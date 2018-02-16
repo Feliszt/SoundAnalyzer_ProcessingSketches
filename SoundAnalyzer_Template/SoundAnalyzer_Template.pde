@@ -1,10 +1,8 @@
-  // OSC parameters
+  // SOUND ANALYZER //
 import oscP5.* ;                        // import libraries
 import netP5.*;
 OscP5 oscP5;
 int localhostadress = 9000;
-
-  // freq parameters
 int numBins;
 float[] freqBins;
 float volume;

@@ -23,7 +23,7 @@ void setup() {
   maxSz = maxSz * 0.5;
   
   // OSC parameters
-  localhostadress = 8060 ;                     // set OSC adress
+  localhostadress = 9001 ;                     // set OSC adress
   oscP5 = new OscP5(this, localhostadress) ;   // connect to OSC channel 
 }
 

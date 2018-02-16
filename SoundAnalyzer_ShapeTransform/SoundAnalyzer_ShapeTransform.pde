@@ -13,9 +13,12 @@ float volume;
 int maxHistSize = 25;
 ArrayList<float[]> freqBinsHist = new ArrayList<float[]>();
 float rot = 0;
-color bgColor = #031926;
-color shapeColor = #F4E9CD;
+color bgColor = #3A405A;
+color shapeColor = #F9DEC9;
 boolean mirror = false;
+enum DrawMode { FILLED, OUTLINE };
+DrawMode mode = DrawMode.FILLED;
+
   // setup function
 void setup() {   
     // window size
@@ -34,17 +37,29 @@ void draw() {
   
   pushMatrix();
   translate(width / 2, height / 2);
-  rotate(- PI / 2);
+  rotate(rot);  
   
-  // draw polygon
-  noFill();
+  // check draw mode
+  if(mode == DrawMode.FILLED) {
+    noStroke();
+  }
+  if(mode == DrawMode.OUTLINE) {
+    noFill();
+    stroke(shapeColor);
+  }
   
   for(int j = 0; j < freqBinsHist.size(); j++) {
     float[] freqList = freqBinsHist.get(j);
     float rad = map(j, 0, maxHistSize, width / 4, width / 50);
-    float force = map(j, 0, maxHistSize, 1, 0.5);
-    strokeWeight(map(j, 0, maxHistSize, 5, 1));
-    stroke(shapeColor);
+    float force = map(j, 0, maxHistSize, 1, 0.5);    
+      // check draw mode
+    if(mode == DrawMode.FILLED) {
+      fill(lerpColor(bgColor, shapeColor, (float) j / maxHistSize));
+    }
+    if(mode == DrawMode.OUTLINE) {
+      strokeWeight(map(j, 0, maxHistSize, 3, 0.5));
+    } 
+    
     beginShape();
     for(int i = 0; i < freqList.length; i++) {
       float rho =  rad + freqList[i] * force; 
@@ -60,14 +75,21 @@ void draw() {
     }
     endShape(CLOSE);
   }
-  popMatrix();
+  popMatrix(); 
   
-  //rot += volume / 10;
+  
+  rot += volume / 30;
 }
 
 void keyPressed() {
   if (key == '+') {
     maxHistSize++;
+  }
+  if (key == '1') {
+    mode = DrawMode.FILLED;
+  }
+  if (key == '2') {
+    mode = DrawMode.OUTLINE;
   }
 }
 

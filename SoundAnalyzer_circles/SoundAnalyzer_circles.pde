@@ -2,58 +2,64 @@
 import oscP5.* ;                        // import libraries
 import netP5.*;
 OscP5 oscP5;
-int localhostadress ;
+int localhostadress = 9000;
 
   // freq parameters
 int numBins;
 float[] freqBins;
 float volume;
 
-  // rectangle parameters
-float szRect;
-float interRectMax = 20;
-float startRect;
-color colBg = #e1d8cd;
-color colRect = #623722;
+//
+int numBinsPrev = 0;
+ArrayList<Circle> circles = new ArrayList<Circle>();
 
   // setup function
 void setup() {   
     // window size
-  size(1000, 500);
-  rectMode(CORNER);
-  noStroke();
-  
-    // set rect parameters
-   startRect = width / 16;
+  size(1000, 800);
+  //fullScreen();
   
       // OSC parameters
-  localhostadress = 9000 ;                     // set OSC adress
   oscP5 = new OscP5(this, localhostadress) ;   // connect to OSC channel 
 }  
   
   // draw function
 void draw() {
-  // set background
-  background(240);
+  // background
+  int colBg = 10;
+  background(colBg);
   
-  // compute size of rect
-  float interRect = interRectMax / numBins * interRectMax;
-  szRect = (width - 2 * startRect - (numBins - 1) * interRect ) / numBins;
+  // compute color
+  color col = color((int) map(volume, 0, 0.5, 10, 500));
   
-  
-  pushMatrix();
-  translate(startRect, height / 2);
-  // draw each rectangle
-  fill(colRect);
-  float offsetX = 0;
-  for(int i = 0; i < numBins; i++)
-  {
-    rect(offsetX, -freqBins[i], szRect, freqBins[i]);    
-    offsetX += szRect + interRect;
+  if(numBins != numBinsPrev) {
+   if(numBins > numBinsPrev) {
+    for(int i = 0; i < numBins - numBinsPrev; i++) {
+     Circle newCirc = new Circle(0, 2);
+     circles.add(newCirc);
+    }
+   }
+   if(numBins < numBinsPrev) {
+    for(int i = 0; i < numBinsPrev - numBins; i++) {
+     circles.remove(circles.size() - 1); 
+    }
+   }
   }
-  popMatrix();
   
+  //
+  for(int i = 0; i < numBins; i++) {
+   circles.get(i).update();
+   circles.get(i).show(freqBins[i] * 1, col);
+   
+   if(circles.get(i).out) {
+      circles.remove(i);
+      Circle newCircle = new Circle(0, 2);
+      circles.add(newCircle);
+   }
+  }
   
+  // update numBins
+  numBinsPrev = numBins;
 }
 
   // function that receives OSC messages
@@ -78,5 +84,5 @@ void oscEvent(OscMessage theOscMessage) {
     for (int i = 0; i < numBins; i++) {
       freqBins[i] = theOscMessage.get(i).floatValue(); 
     }
-  } 
+  }  
 }
